@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>POST SPA web development with HTMX</title>
+
+	<link rel="stylesheet" href="dist/reset.css">
+	<link rel="stylesheet" href="dist/reveal.css">
+	<link rel="stylesheet" href="dist/theme/guayo.css">
+
+	<link rel="stylesheet" href="dist/custom.css">
+
+	<!-- Theme used for syntax highlighted code -->
+	<link rel="stylesheet" href="plugin/highlight/monokai.css">
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<section class="intro">
+				<h1>POST SPA web development with HTMX</h1>
+				<p class="name">Guayo Mena</p>
+			</section>
+
+			<section>
+				<h1>Post SPA?</h1>
+				<aside class="notes">
+					<ul>
+						<li>Quién trabaja con SPA frameworks?</li>
+						<li>Quién ha trabajado con jQuery?</li>
+						<li>Quién ha trabajado con RoR, Drupal, Django puro html?</li>
+					</ul>
+				</aside>
+			</section>
+
+			<section>
+				<h1>MPA</h1>
+				<p>Drupal, Wordpress, RoR, Django, etc.</p>
+			</section>
+
+			<section>
+				<img src="images/mpa-chart.svg" alt="MPA" />
+			</section>
+
+			<section>
+				<h1>Page reloads</h1>
+				<p>Gif de page reload</p>
+			</section>
+
+			<section>
+				<h1>jQuery soup anyone?</h1>
+			</section>
+
+			<section>
+				<img src="images/reactjs-icon.svg" style="width: 200px; margin-right: 50px" alt="ReactJS" />
+				<img src="images/angular-icon.svg" style="width: 200px;" alt="Angular" />
+			</section>
+
+			<section>
+				<img src="images/chart1.webp" alt="Frameworks usage over time chart" />
+				<small>
+					<a href="https://www.mdpi.com/2079-9292/12/17/3563">https://www.mdpi.com/2079-9292/12/17/3563</a>
+				</small>
+				<aside class="notes">
+					<ul>
+						<li>Esto es solo un chart de miles</li>
+					</ul>
+				</aside>
+			</section>
+
+			<section>
+				<img src="images/spa-chart.svg" alt="SPA" />
+			</section>
+
+			<section>
+				<h1>Complejidad</h1>
+				<ul>
+					<li>Virtual DOM</li>
+					<li>Diffing</li>
+					<li>CSR/SSR</li>
+					<li>Server components</li>
+					<li>State management</li>
+					<li>Typescript</li>
+					<li>etc.</li>
+				</ul>
+			</section>
+
+			<section>
+				<h1>Problema XY</h1>
+				<aside class="notes">
+					<p>El problema XY es un problema de comunicación que sucede en una mesa de ayuda o situaciones
+						similares
+						en las que se oculta el problema real, X, de la persona que solicita ayuda, porque en lugar de
+						preguntar directamente sobre el problema X, preguntan cómo resolver un problema secundario, Y,
+						que
+						cree le permitirá resolver el problema X</p>
+				</aside>
+			</section>
+
+			<section>
+				<h1>Radical Simplicity</h1>
+				<img src="images/Complexity2005_2021_black.svg" alt="Radical Simplicity" />
+				<small>
+					<a href="https://www.radicalsimpli.city/">https://www.radicalsimpli.city/</a>
+				</small>
+			</section>
+
+			<section>
+				ui example
+			</section>
+
+			<section>
+				<h3>React</h3>
+				<pre style="font-size: 10px;">
+					<code data-trim data-noescape>
+						const TodoList = () => {
+						const [tasks, setTasks] = useState([]);
+						const [searchTerm, setSearchTerm] = useState('');
+						const [newTask, setNewTask] = useState({ description: '', category: '' });
+
+						useEffect(() => {
+							fetchTasks();
+						}, []);
+
+						const fetchTasks = async () => {
+							try {
+							const response = await axios.get('/api/tasks');
+							setTasks(response.data);
+							} catch (error) {
+							console.error('Error fetching tasks:', error);
+							}
+						};
+
+						const handleSearch = (e) => {
+							setSearchTerm(e.target.value);
+						};
+
+						const handleInputChange = (e) => {
+							const { name, value } = e.target;
+							setNewTask({ ...newTask, [name]: value });
+						};
+
+						const handleAddTask = async () => {
+							try {
+							const response = await axios.post('/api/tasks', newTask);
+							setTasks([...tasks, response.data]);
+							setNewTask({ description: '', category: '' });
+							} catch (error) {
+							console.error('Error adding task:', error);
+							}
+						};
+
+						const filteredTasks = tasks.filter(task =>
+							task.description.toLowerCase().includes(searchTerm.toLowerCase())
+						);
+
+						...
+					</code>
+				</pre>
+			</section>
+
+			<section>
+				<h1>HTMX</h1>
+				<small>
+					<a href="https://htmx.org/">https://htmx.org/</a>
+				</small>
+			</section>
+
+			<section>
+				<h1>¿Cómo funciona?</h1>
+				<img src="images/htmx-chart.svg" alt="HTMX chart" />
+			</section>
+
+			<section>
+				<h1>Instalación</h1>
+				<small>
+					<pre style="width: auto; font-size: 13px;">
+						<code data-trim data-noescape>
+							<script type="text/template">
+								<script src="https://unpkg.com/htmx.org@2.0.1" integrity="sha384-QWG6..." crossorigin="anonymous"></script>
+							</script>
+						</code>
+					</pre>
+				</small>
+			</section>
+
+			<section>
+				<pre>
+					<code>
+					<script type="text/template">
+					<input 
+						type="search" 
+						name="query" 
+						placeholder="Search..." 
+						hx-get="/"
+						hx-trigger="input changed delay:500ms, search" 
+						hx-target="#tasks-container" 
+						hx-indicator=".htmx-indicator"
+						>
+					</script>
+					</code>
+				</pre>
+			</section>
+
+			<section>
+				<h1>Modelos</h1>
+				<pre style="font-size: 13px;">
+					<code>
+					<script type="text/template">
+					class Category(models.Model):
+						name = models.CharField(max_length=100)
+						description = models.TextField(blank=True)
+					
+					class Task(models.Model):
+						title = models.CharField(max_length=200)
+						description = models.TextField(blank=True)
+						completed = models.BooleanField(default=False)
+						category = models.ForeignKey(
+							Category, on_delete=models.CASCADE, related_name="tasks"
+						)
+						</script>
+					</code>
+				</pre>
+			</section>
+
+			<section>
+				<pre style="font-size: 11px; height: 500px;">
+					<code>
+					<script type="text/template">
+					<div id="tasks-container">
+						<table>
+							<thead>
+								<tr>
+									<th>Task</th>
+									<th>Category</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody hx-target="closest tr" hx-swap="outerHTML swap:1s">
+								{% for task in tasks %}
+								<tr>
+									<td>
+										<input type="checkbox" class="task-completed-checkbox"
+											hx-post="{% url 'toggle_task_completed' task_id=task.pk %}"
+											hx-target="#tasks-container"
+											hx-swap="outerHTML" {% if task.completed %}checked{% endif %} 
+											hx-trigger="change">
+										<span class="task-checkbox {% if task.completed %}completed{% endif %}">
+											{{ task.title }}
+										</span>
+									</td>
+									<td>{{ task.category.name }}</td>
+									<td>
+										<button class="delete-btn" hx-delete="{% url 'delete_task' task_id=task.pk %}"
+											hx-confirm="Are you sure?">
+											<i class="lni lni-trash-can"></i>
+										</button>
+									</td>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+					</script>
+					</code>
+				</pre>
+			</section>
+
+		</div>
+	</div>
+
+	<script src="dist/reveal.js"></script>
+	<script src="plugin/notes/notes.js"></script>
+	<script src="plugin/markdown/markdown.js"></script>
+	<script src="plugin/highlight/highlight.js"></script>
+	<script>
+		// More info about initialization & config:
+		// - https://revealjs.com/initialization/
+		// - https://revealjs.com/config/
+		Reveal.initialize({
+			hash: true,
+
+			// Learn about plugins: https://revealjs.com/plugins/
+			plugins: [RevealMarkdown, RevealHighlight, RevealNotes]
+		});
+	</script>
+</body>
+
+</html>
