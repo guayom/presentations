@@ -15,13 +15,17 @@
 
 	<!-- Theme used for syntax highlighted code -->
 	<link rel="stylesheet" href="plugin/highlight/monokai.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+		rel="stylesheet">
 </head>
 
 <body>
 	<div class="reveal">
 		<div class="slides">
 			<section class="intro">
-				<h1>POST SPA web development with HTMX</h1>
+				<h1>POST SPA<br />web development<br />with HTMX</h1>
 				<p class="name">Guayo Mena</p>
 			</section>
 
@@ -30,8 +34,6 @@
 				<aside class="notes">
 					<ul>
 						<li>Quién trabaja con SPA frameworks?</li>
-						<li>Quién ha trabajado con jQuery?</li>
-						<li>Quién ha trabajado con RoR, Drupal, Django puro html?</li>
 					</ul>
 				</aside>
 			</section>
@@ -39,6 +41,11 @@
 			<section>
 				<h1>MPA</h1>
 				<p>Drupal, Wordpress, RoR, Django, etc.</p>
+				<aside class="notes">
+					<ul>
+						<li>Quién ha trabajado con RoR, Drupal, Django puro html?</li>
+					</ul>
+				</aside>
 			</section>
 
 			<section>
@@ -46,12 +53,16 @@
 			</section>
 
 			<section>
-				<h1>Page reloads</h1>
-				<p>Gif de page reload</p>
+				<h1>jQuery soup anyone?</h1>
+				<aside class="notes">
+					<ul>
+						<li>Quién ha trabajado con jQuery?</li>
+					</ul>
+				</aside>
 			</section>
 
 			<section>
-				<h1>jQuery soup anyone?</h1>
+				<h1>Page reloads</h1>
 			</section>
 
 			<section>
@@ -109,7 +120,7 @@
 			</section>
 
 			<section>
-				ui example
+				<img src="images/ui-example.png" alt="UI example" />
 			</section>
 
 			<section>
@@ -188,6 +199,7 @@
 			</section>
 
 			<section>
+				<h3>Active search</h3>
 				<pre>
 					<code>
 					<script type="text/template">
@@ -227,6 +239,7 @@
 			</section>
 
 			<section>
+				<h3>Template</h3>
 				<pre style="font-size: 11px; height: 500px;">
 					<code>
 					<script type="text/template">
@@ -267,6 +280,122 @@
 					</script>
 					</code>
 				</pre>
+			</section>
+			<section>
+				<h3>Obtener tasks</h3>
+				<pre style="font-size: 15px;">
+					<code>
+					<script type="text/template">
+					def list_tasks(request):
+						tasks = Task.objects.all().order_by("completed", "id")
+						categories = Category.objects.all()
+						query = request.GET.get("query", "")
+					
+						if query is not None:
+							tasks = tasks.filter(title__icontains=query)
+					
+						if request.headers.get("Hx-Trigger-Name") == "query":
+							return render(
+								request,
+								"tasks/list_tasks_rows.html",
+								{"tasks": tasks, "categories": categories},
+							)
+						else:
+							return render(
+								request,
+								"tasks/list_tasks.html",
+								{"tasks": tasks, "categories": categories, "query": query},
+							)
+					</script>
+					</code>
+				</pre>
+			</section>
+			<section>
+				<h3>Crear tasks</h3>
+				<pre style="font-size: 15px;">
+					<code>
+					<script type="text/template">
+					def add_task(request):
+						if request.method == "POST":
+							title = request.POST.get("title")
+							category_id = request.POST.get("category")
+							category = Category.objects.get(id=category_id)
+							Task.objects.create(title=title, category=category)
+							tasks = Task.objects.all().order_by("completed", "id")
+							categories = Category.objects.all()
+							return render(
+								request,
+								"tasks/list_tasks_rows.html",
+								{"tasks": tasks, "categories": categories},
+							)
+						return HttpResponse(status=405)
+					</script>
+					</code>
+				</pre>
+			</section>
+			<section>
+				<h3>Borrar tasks</h3>
+				<pre style="font-size: 15px;">
+					<code>
+					<script type="text/template">
+					def delete_task(request, task_id):
+						if request.method == "DELETE":
+							try:
+								task = Task.objects.get(id=task_id)
+								task.delete()
+								if request.headers.get("hx-request"):
+									return HttpResponse(status=200)
+								else:
+									return HttpResponseRedirect(reverse("task_list"))
+							except Task.DoesNotExist:
+								return HttpResponse(status=404)
+						else:
+							return HttpResponse(status=405)
+					</script>
+					</code>
+				</pre>
+			</section>
+			<section>
+				<h3>Actualizar tasks</h3>
+				<pre style="font-size: 15px;">
+					<code>
+					<script type="text/template">
+					def toggle_task_completed(request, task_id):
+						if request.method == "POST":
+							try:
+								task = Task.objects.get(id=task_id)
+								task.completed = not task.completed
+								task.save()
+								if request.headers.get("hx-request"):
+									tasks = Task.objects.all().order_by("completed", "id")
+									categories = Category.objects.all()
+									return render(
+										request,
+										"tasks/list_tasks_rows.html",
+										{"tasks": tasks, "categories": categories},
+									)
+								else:
+									return HttpResponseRedirect(reverse("task_list"))
+							except Task.DoesNotExist:
+								return HttpResponse(status=404)
+						else:
+							return HttpResponse(status=405)
+					</script>
+					</code>
+				</pre>
+			</section>
+
+			<section>
+				<h1>Beneficios</h1>
+				<ul>
+					<li>100% Fullstack</li>
+					<li>Simplicidad / Poco desarrollo y js</li>
+					<li>Proceso de deployment sencillo</li>
+				</ul>
+			</section>
+
+			<section>
+				<h1>¡Gracias!</h1>
 			</section>
 
 		</div>
